@@ -1,0 +1,49 @@
+#!/bin/bash
+#Scripts to automatize P1 Simplescalar simulation
+
+#Input variables
+max_inst=$1
+ctrl_param=$2
+
+#Data variables
+ipcs=()
+
+if (($# < 3)); then
+	echo "./simulate [max_iter] [control_param] [config_file1] [config_file2] ..." >&2
+	exit
+fi
+
+echo $1
+
+echo "applu;art;gzip;mesa;twolf"
+
+i=0
+for config_file in $@; do
+			
+	((i++))
+	if ((i <= 2)); then
+		continue
+	fi
+
+	#APPLU
+	ipcs+=($(../../simplesim-3.0_acx2/sim-outorder -config $config_file -fastfwd 100000000 -max:inst "$max_inst" ../../P1/benchmarks/applu/exe/applu.exe < ../../P1/benchmarks/applu/data/ref/applu.in 2>&1 | grep "$ctrl_param" | awk '{print $2}'))
+
+	#ART
+	ipcs+=($(../../simplesim-3.0_acx2/sim-outorder -config $config_file -fastfwd 100000000 -max:inst "$max_inst" ../../P1/benchmarks/art/exe/art.exe -scanfile ../benchmarks/art/data/ref/c756hel.in -trainfile1 ../benchmarks/art/data/ref/a10.img -trainfile2 ../benchmarks/art/data/ref/hc.img  -stride 2 -startx 110 -starty 200 -endx 160 -endy 240 -objects 10 2>&1 | grep "$ctrl_param" | awk '{print $2}'))
+
+	#GZIP
+	ipcs+=($(../../simplesim-3.0_acx2/sim-outorder -config $config_file -fastfwd 100000000 -max:inst "$max_inst" ../../P1/benchmarks/gzip/exe/gzip.exe ../../P1/benchmarks/gzip/data/ref/input.source 60 2>&1 | grep "$ctrl_param" | awk '{print $2}'))
+
+	#MESA
+	ipcs+=($(../../simplesim-3.0_acx2/sim-outorder -config $config_file -fastfwd 100000000 -max:inst "$max_inst" ../../P1/benchmarks/mesa/exe/mesa.exe -frames 1000 -meshfile ../benchmarks/mesa/data/ref/mesa.in -ppmfile ../benchmarks/mesa/data/ref/mesa.ppm 2>&1 | grep "$ctrl_param" | awk '{print $2}'))
+	
+
+	#TWOLF
+	ipcs+=($(../../simplesim-3.0_acx2/sim-outorder -config $config_file -fastfwd 100000000 -max:inst "$max_inst" ../../P1/benchmarks/twolf/exe/twolf.exe ../../P1/benchmarks/twolf/data/ref/ref 2>&1 | grep "$ctrl_param" | awk '{print $2}'))
+
+
+	echo "${ipcs[@]}" | tr ' ' ';' 
+	ipcs=()
+done
+
+

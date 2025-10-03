@@ -1,0 +1,29 @@
+#Instructions
+-fetch:ifqsize 8
+-decode:width 8
+-issue:width 8
+-commit:width 8
+
+#ROB and Load/Store Queue
+-ruu:size 512
+-lsq:size 256
+
+#Caches
+-cache:il1 il1:64:64:16:l
+-cache:il2 dl2
+-cache:dl1 dl1:256:64:16:l
+-cache:dl2 ul2:4096:64:8:l
+
+#DRAM bandwith and latency
+-mem:width 32
+-mem:lat 496 2
+
+#Integer ALUs
+-res:ialu 3 
+-res:imult 3 
+#Floating Point ALUs
+-res:fpalu 2 
+-res:fpmult 2 
+
+
+
